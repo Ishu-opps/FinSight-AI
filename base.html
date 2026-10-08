@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSight AI - Personal Finance Management</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; }
+        .navbar { background-color: #1e293b; border-bottom: 1px solid #334155; }
+        .toast-container { z-index: 1090; }
+        .chat-offcanvas { background-color: #1e293b; color: #f8fafc; width: 400px; }
+        .chat-msg-user { background-color: #2563eb; color: #fff; border-radius: 12px 12px 0px 12px; }
+        .chat-msg-ai { background-color: #334155; color: #f8fafc; border-radius: 12px 12px 12px 0px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold text-primary" href="#"><i class="fa-solid fa-brain me-2"></i>FinSight AI</a>
+            <div class="d-flex align-items-center">
+                {% if session.get('user_id') %}
+                <span class="me-3 text-light">Welcome, <strong>{{ session.get('user_name') }}</strong></span>
+                <button class="btn btn-outline-info me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#chatOffcanvas">
+                    <i class="fa-solid fa-comments me-1"></i> AI Assistant
+                </button>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger"><i class="fa-solid fa-right-from-bracket"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alert Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+
+    <div class="container-fluid px-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- AI Chatbot Offcanvas Drawer -->
+    <div class="offcanvas offcanvas-end chat-offcanvas" tabindex="-1" id="chatOffcanvas">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title"><i class="fa-solid fa-robot text-info me-2"></i>FinSight AI Advisor</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column" style="height: 100%;">
+            <div id="chatHistory" class="flex-grow-1 overflow-auto mb-3 pe-2">
+                <div class="chat-msg-ai p-3 mb-2 small">
+                    Hello! I am your AI Financial Advisor. Ask me anything about your spending habits, recommendations, or budget forecasts!
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="text" id="chatInput" class="form-control bg-dark text-light border-secondary" placeholder="Type your query...">
+                <button class="btn btn-primary" id="btnSendChat"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Top Metrics Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm border-start border-4 border-danger">
+            <div class="text-muted small">Total Monthly Expense</div>
+            <h3 class="fw-bold text-danger mb-0">₹<span id="metricTotalSpent">{{ "%.2f"|format(total_spent) }}</span></h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm border-start border-4 border-success">
+            <div class="text-muted small">Total Budget Remaining</div>
+            <h3 class="fw-bold text-success mb-0">₹<span id="metricTotalRemaining">{{ "%.2f"|format(total_savings) }}</span></h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm border-start border-4 border-primary">
+            <div class="text-muted small">Total Allocated Budget</div>
+            <h3 class="fw-bold text-primary mb-0">₹{{ "%.2f"|format(total_budget) }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Expense Entry Form -->
+    <div class="col-lg-4">
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-cart-plus me-2 text-primary"></i>Add Quick Expense</h5>
+            <form id="addExpenseForm">
+                <div class="mb-3">
+                    <label class="form-label small">Merchant / Store Name</label>
+                    <input type="text" id="merchantName" class="form-control bg-dark text-light border-secondary" placeholder="e.g. Blinkit, Zepto, Swiggy" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Amount (₹)</label>
+                    <input type="number" step="0.01" id="expenseAmount" class="form-control bg-dark text-light border-secondary" placeholder="0.00" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Payment Method</label>
+                    <select id="paymentMethod" class="form-select bg-dark text-light border-secondary">
+                        <option value="UPI">UPI / Google Pay</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="Net Banking">Net Banking</option>
+                        <option value="Cash">Cash</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Auto-Categorize & Save
+                </button>
+            </form>
+        </div>
+
+        <div class="card p-4 mt-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-chart-line text-warning me-2"></i>Predictive Engine</h5>
+            <p class="small text-muted">AI-driven monthly allocation projection based on 30-day spending trends.</p>
+            <button class="btn btn-outline-warning w-100 fw-bold" id="btnPredict"><i class="fa-solid fa-calculator me-1"></i> Forecast Next Month</button>
+            <div id="predictionResults" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Right Side: Category Progress & Transactions -->
+    <div class="col-lg-8">
+        <!-- Category Progress Bars -->
+        <div class="card p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-chart-pie me-2 text-info"></i>Budget Breakdown</h5>
+            <div class="row g-3" id="categoryContainer">
+                {% for cat in categories %}
+                {% set pct = (cat.current_spent / cat.monthly_budget * 100) if cat.monthly_budget > 0 else 0 %}
+                {% set bg_class = 'bg-success' if pct < 80 else ('bg-warning' if pct < 100 else 'bg-danger') %}
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="fw-bold">{{ cat.category_name }}</span>
+                        <span>₹{{ "%.2f"|format(cat.current_spent) }} / ₹{{ "%.2f"|format(cat.monthly_budget) }}</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar {{ bg_class }}" role="progressbar" style="width: {{ pct if pct <= 100 else 100 }}%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Transactions Table -->
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-receipt me-2 text-secondary"></i>Recent Transactions</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Merchant</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>AI Category</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                        {% for txn in transactions %}
+                        <tr>
+                            <td class="fw-bold">{{ txn.merchant_name }}</td>
+                            <td class="text-danger">₹{{ "%.2f"|format(txn.amount) }}</td>
+                            <td><span class="badge bg-secondary">{{ txn.payment_method }}</span></td>
+                            <td><span class="badge bg-info text-dark">{{ txn.ai_category }}</span></td>
+                            <td class="small text-muted">{{ txn.transaction_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr id="noTxnRow"><td colspan="5" class="text-center text-muted">No transactions recorded yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
